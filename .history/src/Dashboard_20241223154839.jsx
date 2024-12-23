@@ -51,15 +51,51 @@ const Dashboard = () => {
    
 
     // Chart data
+    // const chartData = {
+    //     labels: properties?.map(property => property?.post_title),
+    //     datasets: [{
+    //         label: 'Number of Visits',
+    //         data: properties.map(property => property?.visted || 0 ),
+    //         backgroundColor: 'rgba(75, 192, 192, 0.2)',
+    //         borderColor: 'rgba(75, 192, 192, 1)',
+    //         borderWidth: 1,
+    //     }],
+    // };
+
+
+    // Chart data with conditional formatting
     const chartData = {
         labels: properties?.map(property => property?.post_title),
-        datasets: [{
-            label: 'Number of Visits',
-            data: properties.map(property => property?.visted || 0 ),
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1,
-        }],
+        datasets: [
+            {
+                label: 'Number of Visits',
+                data: properties.map(property => property?.visted || 'No visits'),
+                backgroundColor: properties.map(property =>
+                    property?.visted
+                        ? 'rgba(75, 192, 192, 0.2)' // Normal style for visited properties
+                        : 'rgba(255, 99, 132, 0.5)' // Special style for "No visits"
+                ),
+                borderColor: properties.map(property =>
+                    property?.visted
+                        ? 'rgba(75, 192, 192, 1)'
+                        : 'rgba(255, 99, 132, 1)'
+                ),
+                borderWidth: 1,
+            },
+        ],
+    };
+
+    const options = {
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function (tooltipItem) {
+                        const value = tooltipItem.raw;
+                        return value === 0 ? 'No visits till now' : `Visits: ${value}`;
+                    },
+                },
+            },
+        },
     };
 
     const fetchInteraction = async (propertyId)=>{

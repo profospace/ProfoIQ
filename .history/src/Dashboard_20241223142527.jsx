@@ -20,29 +20,27 @@ const Dashboard = () => {
     const [filteredActivities, setFilteredActivities] = useState([]);
     const [highlightedDates, setHighlightedDates] = useState([]);
     const [showUserDetails, setShowUserDetails] = useState(true); // Boolean flag to control user detail visibility
-    const [singlePropertyStats , setSinglePropertyStats] = useState([])
 
-    console.log(selectedDate)
     // Fetch properties from API
-    const fetchProperties = async () => {
-        try {
-            const response = await axios.get('http://localhost:5053/api/builders/6763ca5d2c71a5e27c41f783/properties');
-            console.log(response)
-            if (response.data.success) {
-                // const propertiesData = response.data.data.properties.map((property) => ({
-                //     id: property.id,
-                //     name: property.title,
-                //     location: property.location,
-                //     visits: Math.floor(Math.random() * 100) + 1, // Generate random visits for chart
-                // }));
-                // console.log("propertiesData", response?.data?.data?.properties)
-                setProperties(response?.data?.data?.properties);
-            }
-        } catch (error) {
-            console.error("Error fetching properties:", error);
-        }
-    };
     useEffect(() => {
+        const fetchProperties = async () => {
+            try {
+                const response = await axios.get('http://localhost:5053/api/builders/6763ca5d2c71a5e27c41f783/properties');
+                console.log(response)
+                if (response.data.success) {
+                    // const propertiesData = response.data.data.properties.map((property) => ({
+                    //     id: property.id,
+                    //     name: property.title,
+                    //     location: property.location,
+                    //     visits: Math.floor(Math.random() * 100) + 1, // Generate random visits for chart
+                    // }));
+                    console.log("propertiesData", response?.data?.data?.properties)
+                    setProperties(response?.data?.data?.properties);
+                }
+            } catch (error) {
+                console.error("Error fetching properties:", error);
+            }
+        };
 
         fetchProperties();
     }, []);
@@ -55,17 +53,16 @@ const Dashboard = () => {
         labels: properties?.map(property => property?.post_title),
         datasets: [{
             label: 'Number of Visits',
-            data: properties.map(property => property?.visted || 0 ),
+            data: properties.map(property => property?.visted || Math.ceil(Math.random() * 100) ),
             backgroundColor: 'rgba(75, 192, 192, 0.2)',
             borderColor: 'rgba(75, 192, 192, 1)',
             borderWidth: 1,
         }],
     };
 
-    const fetchInteraction = async (propertyId)=>{
-        const response = await axios.get(`http://localhost:5053/properties-interaction/api/interactions/stats?propertyId=${propertyId}`)
-        // setSinglePropertyStats - will set daata here
-        console.log(response?.data?.data)
+    const fetchInteraction = async ()=>{
+        const response = await axios.get(`http://localhost:5053/properties-interaction/api/interactions/stats?propertyId=${selectedPropertyId}`)
+        console.log(response)
 
     }
 
@@ -78,7 +75,7 @@ const Dashboard = () => {
             console.log(property)
             setSelectedPropertyId(property._id);
             filterActivitiesByDate(property.id, selectedDate);
-            fetchInteraction(property._id)
+            fetchInteraction()
         }
     };
 

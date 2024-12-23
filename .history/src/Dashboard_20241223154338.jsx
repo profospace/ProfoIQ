@@ -65,7 +65,7 @@ const Dashboard = () => {
     const fetchInteraction = async (propertyId)=>{
         const response = await axios.get(`http://localhost:5053/properties-interaction/api/interactions/stats?propertyId=${propertyId}`)
         // setSinglePropertyStats - will set daata here
-        console.log(response?.data?.data)
+        console.log(response)
 
     }
 

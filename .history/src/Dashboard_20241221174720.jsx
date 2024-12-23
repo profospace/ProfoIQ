@@ -8,93 +8,100 @@ import * as XLSX from 'xlsx';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import 'react-datepicker/dist/react-datepicker.css';
-import axios from 'axios';
 
 // Register the necessary chart components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+// Generate 100 properties
+const generateProperties = () => {
+    return Array.from({ length: 100 }, (_, index) => ({
+        id: index + 1,
+        name: `Property ${index + 1}`,
+        location: `Location ${String.fromCharCode(65 + (index % 26))}`, // Loop through A-Z for locations
+        visits: Math.floor(Math.random() * 100) + 1, // Random number of visits
+    }));
+};
+
+// Generate 1000 users
+const generateUsers = () => {
+    return Array.from({ length: 1000 }, (_, index) => ({
+        id: index + 1,
+        name: `User ${index + 1}`,
+        phone: `12345${(1000 + index).toString().slice(1)}`, // Generating unique phone numbers
+    }));
+};
+
+// Generate activities with random timestamps
+const generateActivities = (properties, users) => {
+    const activities = [];
+    const activityTypes = ['Visited', 'Saved', 'Contacted'];
+    const getRandomActivity = () => activityTypes[Math.floor(Math.random() * activityTypes.length)];
+    const getRandomBoolean = () => Math.random() > 0.5;
+
+    properties.forEach(property => {
+        users.forEach(user => {
+            const randomTimestamp = new Date(
+                Date.now() - Math.floor(Math.random() * 10) * 24 * 60 * 60 * 1000 // Random last 10 days
+            ).toISOString();
+            
+            activities.push({
+                userId: user.id,
+                propertyId: property.id,
+                activity: getRandomActivity(),
+                timestamp: randomTimestamp,
+                saved: getRandomBoolean(),
+                contacted: getRandomBoolean(),
+            });
+        });
+    });
+
+    return activities;
+};
+
+// Generate the data
+const placeholderProperties = generateProperties();
+const placeholderUsers = generateUsers();
+const placeholderActivities = generateActivities(placeholderProperties, placeholderUsers);
+
 const Dashboard = () => {
-    const [properties, setProperties] = useState([]);
     const [selectedPropertyId, setSelectedPropertyId] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [filteredActivities, setFilteredActivities] = useState([]);
     const [highlightedDates, setHighlightedDates] = useState([]);
     const [showUserDetails, setShowUserDetails] = useState(true); // Boolean flag to control user detail visibility
-    const [singlePropertyStats , setSinglePropertyStats] = useState([])
-
-    console.log(selectedDate)
-    // Fetch properties from API
-    const fetchProperties = async () => {
-        try {
-            const response = await axios.get('http://localhost:5053/api/builders/6763ca5d2c71a5e27c41f783/properties');
-            console.log(response)
-            if (response.data.success) {
-                // const propertiesData = response.data.data.properties.map((property) => ({
-                //     id: property.id,
-                //     name: property.title,
-                //     location: property.location,
-                //     visits: Math.floor(Math.random() * 100) + 1, // Generate random visits for chart
-                // }));
-                // console.log("propertiesData", response?.data?.data?.properties)
-                setProperties(response?.data?.data?.properties);
-            }
-        } catch (error) {
-            console.error("Error fetching properties:", error);
-        }
-    };
-    useEffect(() => {
-
-        fetchProperties();
-    }, []);
-
-    console.log("properties", properties)
-   
 
     // Chart data
     const chartData = {
-        labels: properties?.map(property => property?.post_title),
+        labels: placeholderProperties.map(property => property.name),
         datasets: [{
             label: 'Number of Visits',
-            data: properties.map(property => property?.visted || 0 ),
+            data: placeholderProperties.map(property => property.visits),
             backgroundColor: 'rgba(75, 192, 192, 0.2)',
             borderColor: 'rgba(75, 192, 192, 1)',
             borderWidth: 1,
         }],
     };
 
-    const fetchInteraction = async (propertyId)=>{
-        const response = await axios.get(`http://localhost:5053/properties-interaction/api/interactions/stats?propertyId=${propertyId}`)
-        // setSinglePropertyStats - will set daata here
-        console.log(response?.data?.data)
-
-    }
-
+    // Extract the dates with activities to highlight
+    useEffect(() => {
+        const activityDates = placeholderActivities.map(activity => new Date(activity.timestamp).toLocaleDateString());
+        setHighlightedDates([...new Set(activityDates)]);
+    }, []);
 
     // Handle bar chart click to show respective property data
     const handleBarClick = (event, elements) => {
         if (elements.length > 0) {
             const propertyIndex = elements[0].index;
-            const property = properties[propertyIndex];
-            console.log(property)
-            setSelectedPropertyId(property._id);
+            const property = placeholderProperties[propertyIndex];
+            setSelectedPropertyId(property.id);
             filterActivitiesByDate(property.id, selectedDate);
-            fetchInteraction(property._id)
         }
     };
 
     // Filter activities by selected property and date
     const filterActivitiesByDate = (propertyId, date) => {
-        // Simulated activities logic; replace with actual API integration as needed
-        const activities = properties.map(property => ({
-            userId: Math.floor(Math.random() * 1000) + 1,
-            propertyId: property._id,
-            activity: 'Visited',
-            timestamp: new Date().toISOString(),
-            saved: Math.random() > 0.5,
-            contacted: Math.random() > 0.5,
-        }));
         const formattedDate = date.toISOString().split('T')[0];
-        const filtered = activities.filter(
+        const filtered = placeholderActivities.filter(
             activity =>
                 activity.propertyId === propertyId &&
                 activity.timestamp.startsWith(formattedDate)
@@ -110,6 +117,15 @@ const Dashboard = () => {
         }
     };
 
+    // Check if the date has data and highlight it
+    const tileClassName = ({ date }) => {
+        const dateString = date.toLocaleDateString();
+        if (highlightedDates.includes(dateString)) {
+            return 'highlighted';
+        }
+        return '';
+    };
+
     // Toggle user details visibility
     const toggleUserDetails = () => {
         setShowUserDetails(prevState => !prevState);
@@ -118,10 +134,11 @@ const Dashboard = () => {
     // Excel export function
     const exportToExcel = () => {
         const data = filteredActivities.map(activity => ({
-            username: showUserDetails ? `User ${activity.userId}` : '✘',
+            username: showUserDetails ? placeholderUsers.find(user => user.id === activity.userId)?.name : '✘',
             visited: activity.activity === "Visited" ? "✔" : "✘",
             saved: activity.saved ? "✔" : "✘",
             contacted: activity.contacted ? "✔" : "✘",
+            phone: showUserDetails ? placeholderUsers.find(user => user.id === activity.userId)?.phone : '✘',
         }));
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
@@ -134,22 +151,28 @@ const Dashboard = () => {
         const doc = new jsPDF();
 
         // Prepare the data for the table
-        const data = filteredActivities.map(activity => ([
-            showUserDetails ? `User ${activity.userId}` : '✘',
-            activity.activity === "Visited" ? "Yes" : "No",
-            activity.saved ? "Yes" : "No",
-            activity.contacted ? "Yes" : "No",
-        ]));
+        const data = filteredActivities.map(activity => {
+            const user = placeholderUsers.find(user => user.id === activity.userId);
+            return [
+                showUserDetails ? user?.name : '✘', // Conditionally hide/show user name
+                activity.activity === "Visited" ? "Yes" : "No", // Replace "✔" with "Yes" and "✘" with "No"
+                activity.saved ? "Yes" : "No", // Replace "✔" with "Yes" and "✘" with "No"
+                activity.contacted ? "Yes" : "No", // Replace "✔" with "Yes" and "✘" with "No"
+                showUserDetails ? user?.phone : '✘' // Conditionally hide/show phone number
+            ];
+        });
 
         // Use autoTable to generate the table in the PDF
         doc.autoTable({
-            head: [['Username', 'Visited', 'Saved', 'Contacted']],
-            body: data,
+            head: [['Username', 'Visited', 'Saved', 'Contacted', 'Phone']], // Table headers
+            body: data, // Table rows
         });
 
         // Save the PDF file
         doc.save('property_activity.pdf');
     };
+
+    
 
     return (
         <div className="container mt-5">
@@ -167,11 +190,12 @@ const Dashboard = () => {
 
             {selectedPropertyId && (
                 <div className="mt-4">
-                    <h3>Activity for {properties?.find(p => p._id === selectedPropertyId)?.post_title}</h3>
+                    <h3>Activity for {placeholderProperties.find(p => p.id === selectedPropertyId)?.name}</h3>
 
                     <Calendar
                         onChange={handleDateChange}
                         value={selectedDate}
+                        tileClassName={tileClassName}
                     />
 
                     <div className="mt-3">
@@ -191,17 +215,22 @@ const Dashboard = () => {
                                             <th>Visited</th>
                                             <th>Saved</th>
                                             <th>Contacted</th>
+                                            <th>Phone</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredActivities.map((activity, index) => (
-                                            <tr key={index}>
-                                                <td>{showUserDetails ? `User ${activity.userId}` : '✘'}</td>
-                                                <td>{activity.activity === "Visited" ? "✔" : "✘"}</td>
-                                                <td>{activity.saved ? "✔" : "✘"}</td>
-                                                <td>{activity.contacted ? "✔" : "✘"}</td>
-                                            </tr>
-                                        ))}
+                                        {filteredActivities.map((activity, index) => {
+                                            const user = placeholderUsers.find(user => user.id === activity.userId);
+                                            return (
+                                                <tr key={index}>
+                                                    <td>{showUserDetails ? user?.name : '✘'}</td>
+                                                    <td>{activity.activity === "Visited" ? "✔" : "✘"}</td>
+                                                    <td>{activity.saved ? "✔" : "✘"}</td>
+                                                    <td>{activity.contacted ? "✔" : "✘"}</td>
+                                                    <td>{showUserDetails ? user?.phone : '✘'}</td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </>

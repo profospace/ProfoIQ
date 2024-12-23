@@ -20,7 +20,6 @@ const Dashboard = () => {
     const [filteredActivities, setFilteredActivities] = useState([]);
     const [highlightedDates, setHighlightedDates] = useState([]);
     const [showUserDetails, setShowUserDetails] = useState(true); // Boolean flag to control user detail visibility
-    const [singlePropertyStats , setSinglePropertyStats] = useState([])
 
     console.log(selectedDate)
     // Fetch properties from API
@@ -63,9 +62,8 @@ const Dashboard = () => {
     };
 
     const fetchInteraction = async (propertyId)=>{
-        const response = await axios.get(`http://localhost:5053/properties-interaction/api/interactions/stats?propertyId=${propertyId}`)
-        // setSinglePropertyStats - will set daata here
-        console.log(response?.data?.data)
+        const response = await axios.get(`http://localhost:5053/properties-interaction/api/interactions/stats?propertyId=${selectedPropertyId}`)
+        console.log(response)
 
     }
 
@@ -76,7 +74,7 @@ const Dashboard = () => {
             const propertyIndex = elements[0].index;
             const property = properties[propertyIndex];
             console.log(property)
-            setSelectedPropertyId(property._id);
+            // setSelectedPropertyId(property._id);
             filterActivitiesByDate(property.id, selectedDate);
             fetchInteraction(property._id)
         }

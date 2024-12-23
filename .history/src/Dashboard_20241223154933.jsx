@@ -51,17 +51,19 @@ const Dashboard = () => {
    
 
     // Chart data
-    const chartData = {
-        labels: properties?.map(property => property?.post_title),
-        datasets: [{
-            label: 'Number of Visits',
-            data: properties.map(property => property?.visted || 0 ),
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1,
-        }],
-    };
+    // const chartData = {
+    //     labels: properties?.map(property => property?.post_title),
+    //     datasets: [{
+    //         label: 'Number of Visits',
+    //         data: properties.map(property => property?.visted || 0 ),
+    //         backgroundColor: 'rgba(75, 192, 192, 0.2)',
+    //         borderColor: 'rgba(75, 192, 192, 1)',
+    //         borderWidth: 1,
+    //     }],
+    // };
 
+
+    
     const fetchInteraction = async (propertyId)=>{
         const response = await axios.get(`http://localhost:5053/properties-interaction/api/interactions/stats?propertyId=${propertyId}`)
         // setSinglePropertyStats - will set daata here

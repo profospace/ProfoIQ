@@ -20,9 +20,8 @@ const Dashboard = () => {
     const [filteredActivities, setFilteredActivities] = useState([]);
     const [highlightedDates, setHighlightedDates] = useState([]);
     const [showUserDetails, setShowUserDetails] = useState(true); // Boolean flag to control user detail visibility
-    const [singlePropertyStats , setSinglePropertyStats] = useState([])
 
-    console.log(selectedDate)
+    console.log(sele)
     // Fetch properties from API
     const fetchProperties = async () => {
         try {
@@ -35,7 +34,7 @@ const Dashboard = () => {
                 //     location: property.location,
                 //     visits: Math.floor(Math.random() * 100) + 1, // Generate random visits for chart
                 // }));
-                // console.log("propertiesData", response?.data?.data?.properties)
+                console.log("propertiesData", response?.data?.data?.properties)
                 setProperties(response?.data?.data?.properties);
             }
         } catch (error) {
@@ -62,10 +61,9 @@ const Dashboard = () => {
         }],
     };
 
-    const fetchInteraction = async (propertyId)=>{
-        const response = await axios.get(`http://localhost:5053/properties-interaction/api/interactions/stats?propertyId=${propertyId}`)
-        // setSinglePropertyStats - will set daata here
-        console.log(response?.data?.data)
+    const fetchInteraction = async ()=>{
+        const response = await axios.get(`http://localhost:5053/properties-interaction/api/interactions/stats?propertyId=${selectedPropertyId}`)
+        console.log(response)
 
     }
 
@@ -78,7 +76,7 @@ const Dashboard = () => {
             console.log(property)
             setSelectedPropertyId(property._id);
             filterActivitiesByDate(property.id, selectedDate);
-            fetchInteraction(property._id)
+            fetchInteraction()
         }
     };
 
