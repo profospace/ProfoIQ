@@ -22,11 +22,12 @@ const Dashboard = () => {
     const [showUserDetails, setShowUserDetails] = useState(true); // Boolean flag to control user detail visibility
     const [singlePropertyStats , setSinglePropertyStats] = useState([])
 
+
     console.log(selectedDate)
     // Fetch properties from API
     const fetchProperties = async () => {
         try {
-            const response = await axios.get('http://localhost:5053/api/builders/6763ca5d2c71a5e27c41f783/properties');
+            const response = await axios.get('https://propertify.onrender.com/api/builders/6763ca5d2c71a5e27c41f783/properties');
             console.log(response)
             if (response.data.success) {
                 // const propertiesData = response.data.data.properties.map((property) => ({
@@ -36,6 +37,7 @@ const Dashboard = () => {
                 //     visits: Math.floor(Math.random() * 100) + 1, // Generate random visits for chart
                 // }));
                 // console.log("propertiesData", response?.data?.data?.properties)
+                console.log("propertiesData", response)
                 setProperties(response?.data?.data?.properties);
             }
         } catch (error) {
@@ -63,7 +65,7 @@ const Dashboard = () => {
     };
 
     const fetchInteraction = async (propertyId)=>{
-        const response = await axios.get(`http://localhost:5053/properties-interaction/api/interactions/stats?propertyId=${propertyId}`)
+        const response = await axios.get(`https://propertify.onrender.com/properties-interaction/api/interactions/stats?propertyId=${propertyId}`)
         // setSinglePropertyStats - will set daata here
         console.log(response?.data?.data)
 
