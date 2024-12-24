@@ -23,6 +23,7 @@
     "react-dom": "^18.2.0",
     "react-html2pdf": "^1.0.1",
     "react-router-dom": "^7.1.0",
+    "recharts": "^2.15.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

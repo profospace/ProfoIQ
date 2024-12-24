@@ -1,4 +1,32 @@
-.highlighted {
-  background-color: #ffeb3b;
-  /* Yellow background for highlighted dates */
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.highlight {
+  background-color: #4fb847b9;
+  /* Customize the highlight color */
+  color: white;
+  margin: 0.2rem;
+  /* border-radius: 50%; */
+}
+
+.scrollView {
+  overflow-x: auto;
+  /* Enable horizontal scrolling */
+  max-width: 100%;
+  /* Prevent the table from exceeding the container width */
+}
+
+table {
+  width: 100%;
+  /* Ensure the table stretches to its full content width */
+  border-collapse: collapse;
+  /* For cleaner table styling */
+}
+
+body {
+  overflow-x: hidden;
+  /* Prevent horizontal scrolling for the entire app */
 }
