@@ -486,10 +486,11 @@ import 'jspdf-autotable';
 
 import * as XLSX from 'xlsx';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-import 'react-datepicker/dist/react-datepicker.css';
+
 import axios from 'axios';
 import html2canvas from 'html2canvas';
+import UserStatsCard from '../components/UserStatsCard';
+import LocationComponent from '../components/LocationComponent';
 
 // Register the necessary chart components
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
@@ -510,7 +511,9 @@ const Dashboard = () => {
 
     const fetchProperties = async () => {
         try {
-            const response = await axios.get('https://propertify.onrender.com/api/builders/6763ca5d2c71a5e27c41f783/properties');
+            const response = await axios.get(`http://localhost:5053/api/builders/6763ca5d2c71a5e27c41f783/properties`);
+
+            console.log(response)
             if (response.data.success) {
                 setProperties(response?.data?.data?.properties);
             }
@@ -521,7 +524,7 @@ const Dashboard = () => {
 
     const fetchInteraction = async (property) => {
         try {
-            const response = await axios.get(`https://propertify.onrender.com/properties-interaction/api/interactions/stats?propertyId=${property?.post_id}`);
+            const response = await axios.get(`http://localhost:5053/properties-interaction/api/interactions/stats?propertyId=${property?.post_id}`);
             const interactionData = response?.data?.data;
             setSinglePropertyStats(interactionData);
             filterActivitiesByDate(property?.post_id, selectedDate, interactionData);
@@ -562,33 +565,19 @@ const Dashboard = () => {
 
     const exportToExcel = () => {
         const data = filteredActivities.map((activity) => ({
-            username: showUserDetails ? activity.userName : '✘',
-            visited: activity.type === "VISIT" ? "✔" : "✘",
-            visitType: activity?.metadata?.visitType || "N/A",
-            deviceInfo: activity?.metadata?.deviceInfo || "N/A",
+            Username: showUserDetails ? activity.userName : '✘',
+            VisitType: activity?.metadata?.visitType || "N/A",
+            Date_Time: activity.timestamp ? new Date(activity.timestamp).toLocaleString() : 'N/A',
+            Activity_Type: activity.type ? activity.type : 'N/A',
+            // ContactNo: activity?.metadata?.phone || "N/A",
+            // Email: activity?.metadata?.email || "N/A",
+            Device_Info: activity?.metadata?.deviceInfo || "N/A",
         }));
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Property Activity");
         XLSX.writeFile(wb, "property_activity.xlsx");
     };
-
-    // const exportToPDF = () => {
-    //     const doc = new jsPDF();
-    //     const data = filteredActivities.map((activity) => [
-    //         showUserDetails ? activity.userName : '✘',
-    //         activity.type === "VISIT" ? "Yes" : "No",
-    //         activity?.metadata?.visitType || "N/A",
-    //         activity?.metadata?.deviceInfo || "N/A",
-    //     ]);
-    //     doc.autoTable({
-    //         head: [['Username', 'Visited', 'Visit Type', 'Device Info']],
-    //         body: data,
-    //     });
-    //     doc.save('property_activity.pdf');
-    // };
-
-
 
 
     const exportToPDF = async () => {
@@ -623,8 +612,8 @@ const Dashboard = () => {
                 activity.timestamp ? new Date(activity.timestamp).toLocaleTimeString() : 'N/A',
                 // activity.type === "VISIT" ? "Yes" : "No",
                 activity?.metadata?.visitType || "N/A",
-                activity?.metadata?.contact || "N/A",
-                activity?.metadata?.email || "N/A",
+                // activity?.metadata?.phone || "N/A",
+                // activity?.metadata?.email || "N/A",
                 activity?.metadata?.deviceInfo || "N/A",
             ]);
 
@@ -720,13 +709,25 @@ const Dashboard = () => {
         ...new Set(filteredActivities.map((activity) => activity.type)),
     ];
 
+    const locations = [
+        { name: 'New York', users: 85 },
+        { name: 'San Francisco', users: 45 },
+        { name: 'Los Angeles', users: 70 },
+        { name: 'Chicago', users: 30 }
+    ];
+
+
     return (
         <div className="container mt-5">
             <h1>Real Estate Dashboard</h1>
 
+            <UserStatsCard totalUsers={50} userTrend />
+
+            <LocationComponent locations={locations} />
+
             <div className="mt-4">
                 <h3>Property Visits Chart</h3>
-                <Bar
+                {/* <Bar
                     data={{
                         labels: properties.map((property) => property?.post_title),
                         datasets: [{
@@ -738,6 +739,51 @@ const Dashboard = () => {
                         }],
                     }}
                     options={{ onClick: handleBarClick }}
+                /> */}
+
+
+                <Bar
+                    data={{
+                        labels: properties.map((property) => property?.post_title),
+                        datasets: [{
+                            label: 'Number of Visits',
+                            data: properties.map((property) => property?.visted || 0),
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1,
+                        }],
+                    }}
+                    options={{
+                        onClick: handleBarClick,
+                        scales: {
+                            x: {
+                                ticks: {
+                                    callback: function (val, index) {
+                                        return properties[index]?.post_title;
+                                    }
+                                },
+                                afterTickToLabelConversion: function (scale) {
+                                    const xLabels = scale.ticks.map((value, index) => {
+                                        // Get the project name and truncate it to two words
+                                        const projectName = properties[index]?.project?.name || 'No Project';
+                                        const truncatedProjectName = projectName.split(' ').slice(0, 2).join(' ') + (projectName.split(' ').length > 2 ? '...' : '');
+
+                                        return {
+                                            value: value.label, // The property name
+                                            projectName: truncatedProjectName // Truncated project name
+                                        };
+                                    });
+
+                                    scale.ticks.forEach((tick, index) => {
+                                        tick.label = [
+                                            xLabels[index].value,
+                                            xLabels[index].projectName
+                                        ];
+                                    });
+                                }
+                            }
+                        }
+                    }}
                 />
             </div>
 
@@ -753,7 +799,7 @@ const Dashboard = () => {
                                 const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
                                 const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
                                 const formattedDate = utcDate.toISOString().split('T')[0];
-                                console.log("formattedDate", formattedDate)
+                                // console.log("formattedDate", formattedDate)
 
                                 return highlightedDates.includes(formattedDate) ? 'highlight' : 'null';
                             }
@@ -808,8 +854,8 @@ const Dashboard = () => {
                                                     <td>{activity.type}</td>
                                                     <td>{new Date(activity.timestamp).toLocaleString()}</td>
                                                     <td>{activity?.metadata?.visitType || 'N/A'}</td>
-                                                    {/* <td>{activity?.metadata?.contact || 'N/A'}</td> */}
-                                                    {/* <td>{activity?.metadata?.email || 'N/A'}</td> */}
+                                                    <td>{activity?.contactInfo?.phoneNumber || 'N/A'}</td>
+                                                    <td>{activity?.contactInfo?.email || 'N/A'}</td>
                                                     <td>
                                                         {showUserDetails
                                                             ? (activity?.metadata?.contact || 'N/A')
@@ -867,8 +913,8 @@ const Dashboard = () => {
                                             {filteredActivities.map((activity, index) => (
                                                 <tr key={index}>
                                                     <td>{showUserDetails ? activity.userName : '✘'}</td>
-                                                    {showUserDetails && <td>{activity?.metadata?.contact || 'N/A'}</td>}
-                                                    {showUserDetails && <td>{activity?.metadata?.email || 'N/A'}</td>}
+                                                    {showUserDetails && <td>{activity?.contactInfo?.phoneNumber || 'N/A'}</td>}
+                                                    {showUserDetails && <td>{activity?.contactInfo?.email || 'N/A'}</td>}
                                                     <td>{new Date(activity.timestamp).toLocaleString()}</td>
                                                     {uniqueActivityTypes.map((type, i) => (
                                                         <td key={i}>
@@ -888,6 +934,9 @@ const Dashboard = () => {
 
                 </div>
             )}
+
+
+
         </div>
     );
 };

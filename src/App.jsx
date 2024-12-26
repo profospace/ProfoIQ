@@ -1,7 +1,7 @@
 import React,{lazy, Suspense} from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LoadingPage from './components/LoadingPage';
-const Login = React.lazy(() => import('./pages/Login'))
+const Login = React.lazy(() => import('./Login'))
 const Dashboard = React.lazy(() => import('./pages/Dashboard'))
 
 

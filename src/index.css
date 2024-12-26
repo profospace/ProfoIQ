@@ -1,17 +1,21 @@
-*{
+/* Reset CSS */
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* Highlight style for specific elements */
 .highlight {
   background-color: #4fb847b9;
   /* Customize the highlight color */
-  /* color: white; */
-  /* margin: 0.2rem; */
   /* border-radius: 50%; */
+  /* padding: 5px; */
+  text-align: center;
+  color: white;
 }
 
+/* Scrollable area for tables */
 .scrollView {
   overflow-x: auto;
   /* Enable horizontal scrolling */
@@ -19,14 +23,160 @@
   /* Prevent the table from exceeding the container width */
 }
 
+/* Basic table styling */
 table {
   width: 100%;
   /* Ensure the table stretches to its full content width */
   border-collapse: collapse;
   /* For cleaner table styling */
+  margin-top: 20px;
+  /* Add spacing to the top */
 }
 
+/* Prevent horizontal scrolling for the entire body */
 body {
   overflow-x: hidden;
-  /* Prevent horizontal scrolling for the entire app */
+  /* Prevent horizontal scrolling */
+}
+
+/* User Stats Card */
+.user-stats-card {
+  background: linear-gradient(135deg, #ff7c7c, #ff4c4c);
+  /* Red gradient for stats */
+  color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Arial', sans-serif;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trend-indicator {
+  font-size: 16px;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.trend-indicator.positive {
+  background-color: #4caf50;
+  color: white;
+}
+
+.trend-indicator.negative {
+  background-color: #f44336;
+  color: white;
+}
+
+.stats-body h1 {
+  font-size: 48px;
+  margin: 0;
+}
+
+.stats-footer {
+  font-size: 14px;
+  text-align: right;
+  opacity: 0.7;
+}
+
+.footer-text {
+  font-style: italic;
+}
+
+/* Active Users Card */
+.active-users-card {
+  background: #2196f3;
+  color: white;
+  border-radius: 10px;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.active-users-card h3 {
+  margin: 0;
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.active-users-card h1 {
+  margin-top: 10px;
+  font-size: 36px;
+}
+
+/* Location Dashboard */
+.location-dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.location-card {
+  background-color: #00C853;
+  /* Default Green for more users */
+  border-radius: 8px;
+  color: #fff;
+  width: 250px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.location-card:hover {
+  transform: translateY(-10px);
+}
+
+.location-info h5 {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.location-info p {
+  font-size: 1rem;
+  font-weight: normal;
+  margin-top: 10px;
+}
+
+.location-bar {
+  height: 8px;
+  margin-top: 20px;
+  border-radius: 5px;
+  background-color: #ffeb3b;
+  /* Yellow bar for user distribution */
+}
+
+/* Optional: Add a gradient for large user numbers */
+.location-card[style*="background-color: rgb(0, 200, 83)"] .location-bar {
+  background-color: #8bc34a;
+}
+
+/* Smaller screens, responsive design */
+@media (max-width: 768px) {
+  .location-dashboard {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .location-card {
+    width: 100%;
+    margin-bottom: 15px;
+  }
 }
